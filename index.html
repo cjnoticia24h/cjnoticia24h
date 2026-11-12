@@ -180,5 +180,70 @@ botaoBlogger.style.cssText = 'background:#16834a;color:white;padding:12px;margin
 botaoBlogger.onclick = ligarBlogger;
 
 newsForm.appendChild(botaoBlogger);
+// PESQUISA DE NOTÍCIAS RSS
+async function buscarRSS() {
+    const url = document.getElementById('rssUrl').value.trim();
+    const resultados = document.getElementById('rssResults');
+
+    if (!url || !url.startsWith('https://')) {
+        alert('Introduza um endereço RSS válido começado por https://');
+        return;
+    }
+
+    resultados.innerHTML = '<p>A pesquisar notícias...</p>';
+
+    try {
+        const api = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(url);
+        const resposta = await fetch(api);
+        const dados = await resposta.json();
+
+        if (dados.status !== 'ok') {
+            throw new Error(dados.message || 'Não foi possível ler esta fonte.');
+        }
+
+        resultados.innerHTML = '';
+
+        dados.items.forEach(item => {
+            const caixa = document.createElement('div');
+            caixa.className = 'card';
+            caixa.style.marginBottom = '12px';
+
+            const titulo = document.createElement('h3');
+            titulo.textContent = item.title;
+
+            const resumo = document.createElement('p');
+            resumo.textContent = item.description
+                ? item.description.replace(/<[^>]*>/g, '').slice(0, 250)
+                : 'Sem resumo disponível.';
+
+            const botao = document.createElement('button');
+            botao.className = 'primary';
+            botao.textContent = 'Importar notícia';
+
+            botao.onclick = function() {
+                document.getElementById('title').value = item.title || '';
+                document.getElementById('summary').value = resumo.textContent;
+                document.getElementById('body').value = resumo.textContent;
+                document.getElementById('sources').value = item.link || '';
+
+                show('editor');
+                alert('Notícia importada. Revise antes de publicar.');
+            };
+
+            caixa.appendChild(titulo);
+            caixa.appendChild(resumo);
+            caixa.appendChild(botao);
+
+            resultados.appendChild(caixa);
+        });
+
+        if (!dados.items.length) {
+            resultados.textContent = 'Nenhuma notícia encontrada.';
+        }
+
+    } catch (erro) {
+        resultados.textContent = 'Erro ao pesquisar: ' + erro.message;
+    }
+}
 </script>
 </body></html>
