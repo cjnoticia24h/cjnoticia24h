@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CJ Notícia 24H — Central de Notícias</title>
+<style>
+:root{--bg:#0b1511;--panel:#14231c;--panel2:#1a2d24;--line:#294336;--green:#18a765;--text:#eef7f0;--muted:#9bb3a3;--amber:#f1bd55}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--line);background:#101d16;position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:12px;background:var(--green);display:grid;place-items:center;font-weight:900;color:#062012}.brand strong{display:block;font-size:17px}.brand small{color:var(--muted)}
+.status{font-size:12px;color:#a6e7c2}.layout{display:grid;grid-template-columns:225px 1fr;min-height:calc(100vh - 75px)}
+aside{padding:18px 12px;border-right:1px solid var(--line);background:#101d16}nav button{width:100%;text-align:left;border:0;background:transparent;color:var(--muted);padding:12px;border-radius:9px;margin:3px 0;cursor:pointer;font:inherit}nav button.active,nav button:hover{background:#1b3829;color:#fff}
+main{padding:26px;max-width:1200px;width:100%;margin:auto}.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}h1{font-size:26px;margin:0 0 4px}.sub{color:var(--muted);margin:0 0 22px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}.stat,.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:17px}.stat small{color:var(--muted)}.stat b{display:block;font-size:27px;margin-top:5px}
+button.primary{background:var(--green);color:#052012;border:0;padding:11px 16px;border-radius:9px;font-weight:750;cursor:pointer}button.secondary,.action{background:#1b3025;color:var(--text);border:1px solid var(--line);padding:9px 12px;border-radius:8px;cursor:pointer}
+.section{display:none}.section.active{display:block}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.news{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}.news:last-child{border:0}.news small{color:var(--muted)}.pill{font-size:11px;padding:4px 8px;border-radius:20px;background:#203d2d;color:#a9e8c2}
+form{display:grid;gap:13px}.field{display:grid;gap:6px}label{color:#c7d8cd;font-size:13px}input,textarea,select{width:100%;background:#0d1912;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:11px;font:inherit}textarea{min-height:180px;resize:vertical}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.notice{border:1px solid #6a552c;background:#302818;color:#f5dca2;padding:13px;border-radius:10px;margin:14px 0}.muted{color:var(--muted)}.empty{padding:25px;text-align:center;color:var(--muted)}
+@media(max-width:760px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line);padding:8px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}.stats{grid-template-columns:repeat(2,1fr)}main{padding:18px}.two{grid-template-columns:1fr}.news{align-items:flex-start;flex-direction:column}header{padding:12px 15px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">CJ</div><div><strong>CJ NOTÍCIA 24H</strong><small>Central de Notícias</small></div></div><div class="status">● Painel de demonstração</div></header>
+<div class="layout">
+<aside><nav>
+<button class="active" data-tab="dashboard">▦ Dashboard</button>
+<button data-tab="central">▤ Central de notícias</button>
+<button data-tab="editor">＋ Criar notícia</button>
+<button data-tab="queue">◷ Fila de publicação</button>
+<button data-tab="history">▣ Histórico</button>
+<button data-tab="settings">⚙ Configurações</button>
+</nav></aside>
+<main>
+<section id="dashboard" class="section active">
+<div class="topline"><div><h1>Dashboard</h1><p class="sub">Bem-vindo à tua redação digital.</p></div><button class="primary" onclick="show('editor')">＋ Nova notícia</button></div>
+<div class="stats"><div class="stat"><small>Total de rascunhos</small><b id="draftCount">0</b></div><div class="stat"><small>Agendadas</small><b id="scheduledCount">0</b></div><div class="stat"><small>Publicadas por esta central</small><b id="publishedCount">0</b></div><div class="stat"><small>Categorias</small><b>5</b></div></div>
+<div class="card"><h3>Últimas notícias guardadas</h3><div id="recent"></div></div>
+<div class="notice">Esta é a primeira versão visual. Os rascunhos ficam guardados neste navegador. A publicação real no Blogger será ativada depois da configuração segura da API Google.</div>
+</section>
+<section id="central" class="section"><h1>Central de notícias</h1><p class="sub">Organiza os conteúdos da redação.</p><div class="card"><div class="row"><select id="filter"><option value="">Todas as categorias</option><option>Desporto</option><option>Política</option><option>Economia</option><option>Sociedade</option><option>Entretenimento</option></select><button class="secondary" onclick="render()">Filtrar</button></div><div id="allNews"></div></div></section>
+<section id="editor" class="section"><h1 id="editorTitle">Criar notícia</h1><p class="sub">Prepara o artigo antes de o enviares para o Blogger.</p>
+<form id="newsForm"><input type="hidden" id="editId"><div class="field"><label for="title">Título</label><input id="title" required maxlength="150" placeholder="Título claro e informativo"></div>
+<div class="two"><div class="field"><label for="category">Categoria</label><select id="category"><option>Desporto</option><option>Política</option><option>Economia</option><option>Sociedade</option><option>Entretenimento</option><option>Moçambique</option><option>Internacional</option></select></div><div class="field"><label for="date">Data/hora pretendida</label><input id="date" type="datetime-local"></div></div>
+<div class="field"><label for="summary">Resumo / destaque</label><textarea id="summary" style="min-height:80px" placeholder="Resumo para apresentar a notícia"></textarea></div>
+<div class="field"><label for="body">Texto da notícia</label><textarea id="body" required placeholder="Escreve ou cola aqui o artigo..."></textarea></div>
+<div class="two"><div class="field"><label for="image">URL da imagem</label><input id="image" type="url" placeholder="https://..."></div><div class="field"><label for="caption">Legenda da imagem</label><input id="caption" placeholder="Legenda e crédito da fotografia"></div></div>
+<div class="field"><label for="sources">Fontes / referências</label><textarea id="sources" style="min-height:75px" placeholder="Links e fontes consultadas"></textarea></div>
+<div class="field"><label for="labels">Etiquetas (separadas por vírgulas)</label><input id="labels" placeholder="Moçambique, futebol, LaLiga"></div>
+<div class="row"><button class="primary" type="submit">Guardar rascunho</button><button class="secondary" type="button" onclick="resetForm()">Limpar</button></div></form>
+</section>
+<section id="queue" class="section"><h1>Fila de publicação</h1><p class="sub">Artigos guardados para revisão ou agendamento.</p><div class="card" id="queueList"></div></section>
+<section id="history" class="section"><h1>Histórico</h1><p class="sub">Registo local dos artigos preparados nesta central.</p><div class="card" id="historyList"></div></section>
+<section id="settings" class="section"><h1>Configurações</h1><p class="sub">Dados gerais do portal.</p><div class="card"><p><b>Portal:</b> CJ Notícia 24H</p><p><b>Blog:</b> https://chellecj.com</p><p><b>Plataforma:</b> GitHub Pages (a configurar)</p><p><b>Integração Blogger:</b> pendente de autorização Google e configuração da API.</p><div class="notice">Nunca coloques palavras-passe, tokens ou segredos da API diretamente neste ficheiro público.</div></div></section>
+</main></div>
+<script>
+const KEY='cjnoticia24h_items_v1';let items=JSON.parse(localStorage.getItem(KEY)||'[]');
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render()}
+function show(id){document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));if(id==='editor'&&!document.getElementById('editId').value)document.getElementById('editorTitle').textContent='Criar notícia'}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.tab));
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function card(n){return `<div class="news"><div><b>${esc(n.title)}</b><br><small>${esc(n.category)} · ${esc(n.date||'Sem data')} · ${esc(n.status)}</small></div><div class="row"><button class="action" onclick="editItem('${n.id}')">Editar</button><button class="action" onclick="delItem('${n.id}')">Apagar</button></div></div>`}
+function render(){let drafts=items.filter(x=>x.status==='Rascunho'),scheduled=items.filter(x=>x.status==='Agendada'),published=items.filter(x=>x.status==='Publicada');draftCount.textContent=drafts.length;scheduledCount.textContent=scheduled.length;publishedCount.textContent=published.length;recent.innerHTML=items.length?items.slice(-5).reverse().map(card).join(''):'<div class="empty">Ainda não existem notícias. Cria o primeiro rascunho.</div>';let f=filter.value;allNews.innerHTML=(f?items.filter(x=>x.category===f):items).slice().reverse().map(card).join('')||'<div class="empty">Nenhuma notícia encontrada.</div>';queueList.innerHTML=items.filter(x=>x.status!=='Publicada').map(card).join('')||'<div class="empty">A fila está vazia.</div>';historyList.innerHTML=items.slice().reverse().map(card).join('')||'<div class="empty">Sem histórico.</div>'}
+function resetForm(){newsForm.reset();editId.value='';editorTitle.textContent='Criar notícia'}
+newsForm.onsubmit=e=>{e.preventDefault();let id=editId.value||crypto.randomUUID();let old=items.find(x=>x.id===id);let n={id,title:title.value.trim(),category:category.value,date:date.value,summary:summary.value,body:body.value,image:image.value,caption:caption.value,sources:sources.value,labels:labels.value,status:old?.status||'Rascunho',updated:new Date().toISOString()};if(old)items=items.map(x=>x.id===id?n:x);else items.push(n);save();resetForm();show('queue');alert('Rascunho guardado neste navegador.')};
+function editItem(id){let n=items.find(x=>x.id===id);if(!n)return;show('editor');editId.value=n.id;title.value=n.title;category.value=n.category;date.value=n.date;summary.value=n.summary;body.value=n.body;image.value=n.image;caption.value=n.caption;sources.value=n.sources;labels.value=n.labels;editorTitle.textContent='Editar notícia'}
+function delItem(id){if(confirm('Apagar este artigo?')){items=items.filter(x=>x.id!==id);save()}}
+render();
+</script>
+</body></html>
