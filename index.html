@@ -64,5 +64,100 @@ newsForm.onsubmit=e=>{e.preventDefault();let id=editId.value||crypto.randomUUID(
 function editItem(id){let n=items.find(x=>x.id===id);if(!n)return;show('editor');editId.value=n.id;title.value=n.title;category.value=n.category;date.value=n.date;summary.value=n.summary;body.value=n.body;image.value=n.image;caption.value=n.caption;sources.value=n.sources;labels.value=n.labels;editorTitle.textContent='Editar notícia'}
 function delItem(id){if(confirm('Apagar este artigo?')){items=items.filter(x=>x.id!==id);save()}}
 render();
+// LIGAÇÃO AO BLOGGER - CJ NOTÍCIAS 24H
+const BLOGGER_CLIENT_ID = '683700780319-fpjoqglgkeed36d8chgn8uao1bfp0ma1.apps.googleusercontent.com';
+const BLOGGER_URL = 'https://chellecj.com';
+
+let bloggerTokenClient;
+
+function carregarGoogleAPI() {
+  return new Promise((resolve, reject) => {
+    if (window.google?.accounts?.oauth2) return resolve();
+
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+async function ligarBlogger() {
+  try {
+    await carregarGoogleAPI();
+
+    bloggerTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: BLOGGER_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/blogger',
+      callback: async (resposta) => {
+        if (resposta.error) {
+          alert('Erro na autorização do Blogger.');
+          return;
+        }
+
+        await publicarNoBlogger(resposta.access_token);
+      }
+    });
+
+    bloggerTokenClient.requestAccessToken({prompt: 'consent'});
+
+  } catch (erro) {
+    alert('Não foi possível carregar a ligação ao Google.');
+  }
+}
+
+async function publicarNoBlogger(token) {
+  try {
+    const blogResposta = await fetch(
+      'https://www.googleapis.com/blogger/v3/blogs/byurl?url=' +
+      encodeURIComponent(BLOGGER_URL),
+      {headers: {Authorization: 'Bearer ' + token}}
+    );
+
+    if (!blogResposta.ok) throw new Error('Não foi possível encontrar o blog.');
+
+    const blog = await blogResposta.json();
+
+    const conteudo = `
+      <h2>${title.value}</h2>
+      <p>${summary.value}</p>
+      ${image.value ? `<img src="${image.value}" alt="${title.value}" style="max-width:100%">` : ''}
+      <p>${caption.value}</p>
+      <div>${body.value.replace(/\n/g, '<br>')}</div>
+      <p><strong>Fontes:</strong> ${sources.value}</p>
+    `;
+
+    const resposta = await fetch(
+      `https://www.googleapis.com/blogger/v3/blogs/${blog.id}/posts/`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: title.value,
+          content: conteudo,
+          labels: labels.value.split(',').map(x => x.trim()).filter(Boolean)
+        })
+      }
+    );
+
+    if (!resposta.ok) throw new Error('Falha ao publicar a notícia.');
+
+    alert('Notícia publicada com sucesso no Blogger!');
+  } catch (erro) {
+    alert('Erro: ' + erro.message);
+  }
+}
+
+const botaoBlogger = document.createElement('button');
+botaoBlogger.type = 'button';
+botaoBlogger.textContent = 'PUBLICAR NO BLOGGER';
+botaoBlogger.className = 'action';
+botaoBlogger.style.cssText = 'background:#16834a;color:white;padding:12px;margin:10px 0;';
+botaoBlogger.onclick = ligarBlogger;
+
+newsForm.appendChild(botaoBlogger);
 </script>
 </body></html>
