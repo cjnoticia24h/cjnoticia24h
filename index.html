@@ -51,6 +51,26 @@ form{display:grid;gap:13px}.field{display:grid;gap:6px}label{color:#c7d8cd;font-
 <section id="queue" class="section"><h1>Fila de publicação</h1><p class="sub">Artigos guardados para revisão ou agendamento.</p><div class="card" id="queueList"></div></section>
 <section id="history" class="section"><h1>Histórico</h1><p class="sub">Registo local dos artigos preparados nesta central.</p><div class="card" id="historyList"></div></section>
 <section id="settings" class="section"><h1>Configurações</h1><p class="sub">Dados gerais do portal.</p><div class="card"><p><b>Portal:</b> CJ Notícia 24H</p><p><b>Blog:</b> https://chellecj.com</p><p><b>Plataforma:</b> GitHub Pages (a configurar)</p><p><b>Integração Blogger:</b> pendente de autorização Google e configuração da API.</p><div class="notice">Nunca coloques palavras-passe, tokens ou segredos da API diretamente neste ficheiro público.</div></div></section>
+<section id="rss" class="section">
+<h1>Central de Notícias RSS</h1>
+<p class="sub">Pesquisa notícias de diferentes fontes.</p>
+
+<div class="card">
+<h3>Adicionar fonte RSS</h3>
+<div class="field">
+<label>Endereço da fonte RSS</label>
+<input id="rssUrl" type="url" placeholder="https://exemplo.com/feed">
+</div>
+<button class="primary" onclick="buscarRSS()">Pesquisar notícias</button>
+</div>
+
+<div class="card" style="margin-top:18px">
+<h3>Notícias encontradas</h3>
+<div id="rssResults">
+<div class="empty">Adicione uma fonte RSS para começar.</div>
+</div>
+</div>
+</section>
 </main></div>
 <script>
 const KEY='cjnoticia24h_items_v1';let items=JSON.parse(localStorage.getItem(KEY)||'[]');
