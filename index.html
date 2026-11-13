@@ -211,30 +211,92 @@ botaoBlogger.style.cssText = 'background:#16834a;color:white;padding:12px;margin
 botaoBlogger.onclick = ligarBlogger;
 
 newsForm.appendChild(botaoBlogger);
-// PESQUISA DE NOTÍCIAS RSS
+// PESQUISA AUTOMÁTICA POR PAÍS E CATEGORIA
 async function buscarRSS() {
-    const url = document.getElementById('rssUrl').value.trim();
+    const paisSelect = document.getElementById('rssPais');
+    const categoria = document.getElementById('rssCategoria').value;
     const resultados = document.getElementById('rssResults');
 
-    if (!url || !url.startsWith('https://')) {
-        alert('Introduza um endereço RSS válido começado por https://');
-        return;
-    }
+    const paises = {
+        MZ: 'Moçambique',
+        AO: 'Angola',
+        ZA: 'África do Sul',
+        ZW: 'Zimbabwe',
+        MW: 'Malawi',
+        TZ: 'Tanzânia',
+        KE: 'Quénia',
+        NG: 'Nigéria',
+        GH: 'Gana',
+        PT: 'Portugal',
+        BR: 'Brasil',
+        ALL: 'África'
+    };
 
-    resultados.innerHTML = '<p>A pesquisar notícias...</p>';
+    const codigo = paisSelect.value;
+    const pais = paises[codigo];
 
-    try {
-        const api = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(url);
+    const idiomas = {
+        MZ: 'pt-MZ',
+        AO: 'pt-PT',
+        ZA: 'en-ZA',
+        ZW: 'en-ZW',
+        MW: 'en-MW',
+        TZ: 'en-TZ',
+        KE: 'en-KE',
+        NG: 'en-NG',
+        GH: 'en-GH',
+        PT: 'pt-PT',
+        BR: 'pt-BR',
+        ALL: 'pt-PT'
+    };
+
+    const idioma = idiomas[codigo];
+    const regiao = codigo === 'ALL' ? 'ZA' : codigo;
+
+    resultados.innerHTML = '<p>A procurar as notícias mais recentes...</p>';
+
+    async function pesquisar(periodo) {
+        let pesquisa = `${categoria} ${pais} when:${periodo}`;
+
+        const feed = 'https://news.google.com/rss/search?q=' +
+            encodeURIComponent(pesquisa) +
+            '&hl=' + idioma +
+            '&gl=' + regiao +
+            '&ceid=' + regiao + ':' + idioma;
+
+        const api = 'https://api.rss2json.com/v1/api.json?rss_url=' +
+            encodeURIComponent(feed);
+
         const resposta = await fetch(api);
         const dados = await resposta.json();
 
         if (dados.status !== 'ok') {
-            throw new Error(dados.message || 'Não foi possível ler esta fonte.');
+            throw new Error('Não foi possível obter as notícias.');
         }
+
+        return dados.items || [];
+    }
+
+    try {
+        let noticias = await pesquisar('1d');
+
+        if (noticias.length < 3) {
+            noticias = await pesquisar('7d');
+        }
+
+        noticias.sort((a, b) =>
+            new Date(b.pubDate) - new Date(a.pubDate)
+        );
 
         resultados.innerHTML = '';
 
-        dados.items.forEach(item => {
+        if (!noticias.length) {
+            resultados.innerHTML =
+                '<div class="empty">Não foram encontradas notícias. Tenta outra categoria.</div>';
+            return;
+        }
+
+        noticias.forEach(item => {
             const caixa = document.createElement('div');
             caixa.className = 'card';
             caixa.style.marginBottom = '12px';
@@ -243,9 +305,21 @@ async function buscarRSS() {
             titulo.textContent = item.title;
 
             const resumo = document.createElement('p');
-            resumo.textContent = item.description
-                ? item.description.replace(/<[^>]*>/g, '').slice(0, 250)
-                : 'Sem resumo disponível.';
+            resumo.textContent = (item.description || '')
+                .replace(/<[^>]*>/g, '')
+                .slice(0, 300);
+
+            const data = document.createElement('small');
+            data.className = 'muted';
+
+            const dataPublicacao = new Date(item.pubDate);
+
+            data.textContent = isNaN(dataPublicacao)
+                ? 'Data não disponível'
+                : dataPublicacao.toLocaleString('pt-MZ');
+
+            const fonte = document.createElement('p');
+            fonte.innerHTML = '<small>Fonte: Google Notícias</small>';
 
             const botao = document.createElement('button');
             botao.className = 'primary';
@@ -256,25 +330,27 @@ async function buscarRSS() {
                 document.getElementById('summary').value = resumo.textContent;
                 document.getElementById('body').value = resumo.textContent;
                 document.getElementById('sources').value = item.link || '';
+                document.getElementById('category').value = categoria;
 
                 show('editor');
+
                 alert('Notícia importada. Revise antes de publicar.');
             };
 
             caixa.appendChild(titulo);
+            caixa.appendChild(data);
             caixa.appendChild(resumo);
+            caixa.appendChild(fonte);
             caixa.appendChild(botao);
 
             resultados.appendChild(caixa);
         });
 
-        if (!dados.items.length) {
-            resultados.textContent = 'Nenhuma notícia encontrada.';
-        }
-
     } catch (erro) {
-        resultados.textContent = 'Erro ao pesquisar: ' + erro.message;
+        resultados.innerHTML =
+            '<div class="empty">Erro na pesquisa. Tenta novamente.</div>';
     }
+} }
 }
 </script>
 </body></html>
