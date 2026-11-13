@@ -52,22 +52,53 @@ form{display:grid;gap:13px}.field{display:grid;gap:6px}label{color:#c7d8cd;font-
 <section id="history" class="section"><h1>Histórico</h1><p class="sub">Registo local dos artigos preparados nesta central.</p><div class="card" id="historyList"></div></section>
 <section id="settings" class="section"><h1>Configurações</h1><p class="sub">Dados gerais do portal.</p><div class="card"><p><b>Portal:</b> CJ Notícia 24H</p><p><b>Blog:</b> https://chellecj.com</p><p><b>Plataforma:</b> GitHub Pages (a configurar)</p><p><b>Integração Blogger:</b> pendente de autorização Google e configuração da API.</p><div class="notice">Nunca coloques palavras-passe, tokens ou segredos da API diretamente neste ficheiro público.</div></div></section>
 <section id="rss" class="section">
-<h1>Central de Notícias RSS</h1>
-<p class="sub">Pesquisa notícias de diferentes fontes.</p>
+<h1>Central de Notícias Automáticas</h1>
+<p class="sub">Encontra as notícias mais recentes por país e categoria.</p>
 
 <div class="card">
-<h3>Adicionar fonte RSS</h3>
+<h3>Pesquisar notícias</h3>
+
+<div class="two">
 <div class="field">
-<label>Endereço da fonte RSS</label>
-<input id="rssUrl" type="url" placeholder="https://exemplo.com/feed">
+<label for="rssPais">Escolher país</label>
+<select id="rssPais">
+<option value="MZ">Moçambique</option>
+<option value="AO">Angola</option>
+<option value="ZA">África do Sul</option>
+<option value="ZW">Zimbabwe</option>
+<option value="MW">Malawi</option>
+<option value="TZ">Tanzânia</option>
+<option value="KE">Quénia</option>
+<option value="NG">Nigéria</option>
+<option value="GH">Gana</option>
+<option value="PT">Portugal</option>
+<option value="BR">Brasil</option>
+<option value="ALL">Toda a África</option>
+</select>
 </div>
-<button class="primary" onclick="buscarRSS()">Pesquisar notícias</button>
+
+<div class="field">
+<label for="rssCategoria">Categoria</label>
+<select id="rssCategoria">
+<option value="Política">Política</option>
+<option value="Economia">Economia</option>
+<option value="Desporto">Desporto</option>
+<option value="Sociedade">Sociedade</option>
+<option value="Tecnologia">Tecnologia</option>
+<option value="Saúde">Saúde</option>
+<option value="Educação">Educação</option>
+<option value="Cultura">Cultura</option>
+</select>
+</div>
+</div>
+
+<button class="primary" onclick="buscarRSS()">🔎 Pesquisar notícias recentes</button>
 </div>
 
 <div class="card" style="margin-top:18px">
-<h3>Notícias encontradas</h3>
+<h3>Resultados da pesquisa</h3>
 <div id="rssResults">
-<div class="empty">Adicione uma fonte RSS para começar.</div>
+<div class="empty">Escolha um país e uma categoria para começar.</div>
 </div>
 </div>
 </section>
