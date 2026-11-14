@@ -377,6 +377,76 @@ async function buscarRSS() {
             '<div class="empty">Erro na pesquisa. Verifique a ligação à Internet e tente novamente.</div>';
     }
 }
+// LIGAÇÃO AO GEMINI ATRAVÉS DO CLOUDFLARE
+async function desenvolverNoticiaComIA() {
+    const titulo = document.getElementById('title').value.trim();
+    const categoria = document.getElementById('category').value;
+    const resumo = document.getElementById('summary').value.trim();
+    const fonte = document.getElementById('sources').value.trim();
+    const corpo = document.getElementById('body');
+
+    if (!titulo && !resumo) {
+        alert('Introduza primeiro o título ou resumo da notícia.');
+        return;
+    }
+
+    const botao = document.getElementById('gerarIA');
+    botao.disabled = true;
+    botao.textContent = 'A desenvolver notícia...';
+
+    try {
+        const resposta = await fetch(
+            'https://cj-noticias-api.cheltonjoao542.workers.dev/',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: titulo,
+                    category: categoria,
+                    summary: resumo,
+                    sourceUrl: fonte,
+                    country: 'Moçambique'
+                })
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok || !dados.success) {
+            throw new Error(dados.error || 'Não foi possível desenvolver a notícia.');
+        }
+
+        corpo.value = dados.article;
+
+        alert(
+            'Notícia desenvolvida com sucesso! Palavras: ' +
+            dados.wordCount
+        );
+
+    } catch (erro) {
+        alert('Erro: ' + erro.message);
+    } finally {
+        botao.disabled = false;
+        botao.textContent = 'Desenvolver notícia com IA (+1000 palavras)';
+    }
+}
+
+// CRIAR BOTÃO DE DESENVOLVIMENTO
+const campoTexto = document.getElementById('body');
+
+if (campoTexto) {
+    const botaoIA = document.createElement('button');
+    botaoIA.type = 'button';
+    botaoIA.id = 'gerarIA';
+    botaoIA.className = 'primary';
+    botaoIA.textContent = 'Desenvolver notícia com IA (+1000 palavras)';
+    botaoIA.style.marginBottom = '12px';
+    botaoIA.onclick = desenvolverNoticiaComIA;
+
+    campoTexto.parentNode.insertBefore(botaoIA, campoTexto);
+}
 </script>
 </script>
 </body></html>
