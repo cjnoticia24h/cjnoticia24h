@@ -273,25 +273,34 @@ async function buscarRSS() {
 
     resultados.innerHTML = '<p>A pesquisar notícias...</p>';
 
-    async function pesquisar(periodo) {
-        const [idioma, regiao] = idiomas[codigo];
+    
+async function pesquisar(periodo) {
+    const [idioma, regiao] = idiomas[codigo];
 
-        const feed = 'https://news.google.com/rss/search?q=' +
-            encodeURIComponent(pesquisa + ' when:' + periodo) +
-            '&hl=' + idioma +
-            '&gl=' + regiao +
-            '&ceid=' + regiao + ':' + idioma;
+    const feed = 'https://news.google.com/rss/search?q=' +
+        encodeURIComponent(pesquisa + ' when:' + periodo) +
+        '&hl=' + idioma +
+        '&gl=' + regiao +
+        '&ceid=' + regiao + ':' + idioma;
 
-        const api = 'https://api.rss2json.com/v1/api.json?rss_url=' +
-            encodeURIComponent(feed);
+    const api = 'https://api.rss2json.com/v1/api.json?rss_url=' +
+        encodeURIComponent(feed);
 
-        const resposta = await fetch(api);
-        const dados = await resposta.json();
+    const resposta = await fetch(api);
 
-        if (dados.status !== 'ok') {
-    throw new Error(
-        dados.message || dados.status || 'Erro ao obter notícias.'
-    );
+    if (!resposta.ok) {
+        throw new Error('Erro RSS2JSON: HTTP ' + resposta.status);
+    }
+
+    const dados = await resposta.json();
+
+    if (dados.status !== 'ok') {
+        throw new Error(
+            dados.message || dados.status || 'Erro ao obter notícias.'
+        );
+    }
+
+    return dados.items || [];
 }
 
     try {
