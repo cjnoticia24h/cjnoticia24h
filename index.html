@@ -289,11 +289,10 @@ async function buscarRSS() {
         const dados = await resposta.json();
 
         if (dados.status !== 'ok') {
-            throw new Error('Erro ao obter notícias.');
-        }
-
-        return dados.items || [];
-    }
+    throw new Error(
+        dados.message || dados.status || 'Erro ao obter notícias.'
+    );
+}
 
     try {
         let noticias = await pesquisar('1d');
