@@ -274,6 +274,7 @@ async function buscarRSS() {
     resultados.innerHTML = '<p>A pesquisar notícias...</p>';
 
     
+
 async function pesquisar(periodo) {
     const [idioma, regiao] = idiomas[codigo];
 
@@ -302,6 +303,7 @@ async function pesquisar(periodo) {
 
     return dados.items || [];
 }
+
 
     try {
         let noticias = await pesquisar('1d');
